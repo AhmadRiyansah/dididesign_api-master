@@ -101,7 +101,7 @@
         <a href="#" class="nav-item"><i class="fa-solid fa-cart-shopping nav-icon"></i> Pesanan</a>
         <a href="#" class="nav-item"><i class="fa-solid fa-print nav-icon"></i> Cetak File</a>
         <div class="nav-label">Pengiriman</div>
-        <a href="#" class="nav-item"><i class="fa-solid fa-motorcycle nav-icon"></i> Kurir</a>
+        <a href="{{ route('admin.couriers.index') }}" class="nav-item"><i class="fa-solid fa-motorcycle nav-icon"></i> Kurir</a>
     </nav>
     <div class="sidebar-footer">
         <div class="user-profile">

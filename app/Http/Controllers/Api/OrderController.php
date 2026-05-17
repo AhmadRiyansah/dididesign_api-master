@@ -7,6 +7,7 @@ use App\Models\Cart;
 use App\Models\Notification;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Http\Controllers\Api\CourierOrderController;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -106,9 +107,12 @@ class OrderController extends Controller
             'data'    => json_encode(['order_id' => $order->id, 'order_code' => $order->order_code]),
         ]);
 
+        // ── Auto-assign ke kurir terdekat yang online ──
+        CourierOrderController::autoAssignCourier($order);
+
         return response()->json([
             'message' => 'Pesanan berhasil dibuat.',
-            'data'    => $this->formatOrder($order->load('items.product')),
+            'data'    => $this->formatOrder($order->fresh(['items.product', 'courier.profile'])),
         ], 201);
     }
 
@@ -141,6 +145,9 @@ class OrderController extends Controller
     // ── Helper ───────────────────────────────────────────────────────────────
     private function formatOrder(Order $order): array
     {
+        $courierUser    = $order->courier;
+        $courierProfile = $courierUser?->profile;
+
         return [
             'id'             => $order->id,
             'order_code'     => $order->order_code,
@@ -152,6 +159,10 @@ class OrderController extends Controller
             'order_status'   => $order->order_status,
             'address'        => $order->address,
             'created_at'     => $order->created_at?->toDateTimeString(),
+            'courier'        => $courierUser ? [
+                'name'  => $courierProfile?->name ?? 'Kurir',
+                'phone' => $courierProfile?->phone,
+            ] : null,
             'items'          => $order->items->map(fn ($i) => [
                 'id'           => $i->id,
                 'quantity'     => $i->quantity,

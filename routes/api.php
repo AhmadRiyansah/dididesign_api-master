@@ -93,17 +93,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 });
 
-/*
-|--------------------------------------------------------------------------
-| Admin (website)
-|--------------------------------------------------------------------------
-*/
 
-Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
-    Route::get('/couriers',                          [AdminCourierController::class, 'index']);
-    Route::post('/couriers',                         [AdminCourierController::class, 'store']);
-    Route::patch('/couriers/{courier}/availability', [AdminCourierController::class, 'updateAvailability']);
-});
 
 /*
 |--------------------------------------------------------------------------
@@ -132,4 +122,60 @@ Route::middleware(['auth:sanctum', 'role:kurir'])->prefix('courier')->group(func
             'data'    => $courier->fresh(),
         ]);
     });
+
+    // Courier Order Management
+    Route::get('/orders',                  [\App\Http\Controllers\Api\CourierOrderController::class, 'index']);
+    Route::patch('/orders/{id}/accept',    [\App\Http\Controllers\Api\CourierOrderController::class, 'accept']);
+    Route::patch('/orders/{id}/pickup',    [\App\Http\Controllers\Api\CourierOrderController::class, 'pickup']);
+    Route::patch('/orders/{id}/deliver',   [\App\Http\Controllers\Api\CourierOrderController::class, 'deliver']);
+    Route::patch('/orders/{id}/reject',    [\App\Http\Controllers\Api\CourierOrderController::class, 'reject']);
 });
+
+/*
+|--------------------------------------------------------------------------
+| Admin — manual assign kurir (fallback jika auto-assign gagal)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
+    // Existing courier management
+    Route::get('/couriers',                          [AdminCourierController::class, 'index']);
+    Route::post('/couriers',                         [AdminCourierController::class, 'store']);
+    Route::patch('/couriers/{courier}/availability', [AdminCourierController::class, 'updateAvailability']);
+
+    // Manual assign kurir ke pesanan
+    Route::patch('/orders/{id}/assign-courier', function (Request $request, int $id) {
+        $validated = $request->validate([
+            'courier_id' => 'required|exists:users,id',
+        ]);
+
+        $order = \App\Models\Order::findOrFail($id);
+        $order->update(['courier_id' => $validated['courier_id']]);
+
+        // Notifikasi ke kurir
+        \App\Models\Notification::create([
+            'user_id' => $validated['courier_id'],
+            'title'   => 'Pesanan Baru (Admin)',
+            'body'    => "Admin mengassign pesanan {$order->order_code} kepada Anda.",
+            'type'    => 'order',
+            'is_read' => false,
+            'data'    => json_encode(['order_id' => $order->id, 'order_code' => $order->order_code]),
+        ]);
+
+        return response()->json([
+            'message' => 'Kurir berhasil di-assign.',
+            'data'    => $order->fresh(['items.product', 'courier.profile']),
+        ]);
+    });
+
+    // Daftar pesanan yang belum punya kurir (unassigned)
+    Route::get('/orders/unassigned', function () {
+        $orders = \App\Models\Order::whereNull('courier_id')
+            ->where('order_status', 'process')
+            ->with(['items.product', 'customer.profile'])
+            ->latest()
+            ->get();
+
+        return response()->json(['data' => $orders]);
+    });
+});
+

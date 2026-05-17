@@ -338,8 +338,7 @@
             <a href="#" class="nav-item"><i class="fa-solid fa-money-bill-transfer nav-icon"></i> Pembayaran</a>
 
             <div class="nav-label">Pengiriman</div>
-            <a href="#" class="nav-item"><i class="fa-solid fa-motorcycle nav-icon"></i> Kurir</a>
-            <a href="#" class="nav-item"><i class="fa-solid fa-route nav-icon"></i> Tracking</a>
+            <a href="{{ route('admin.couriers.index') }}" class="nav-item"><i class="fa-solid fa-motorcycle nav-icon"></i> Kurir</a>
 
             <div class="nav-label">Pengaturan</div>
             <a href="#" class="nav-item"><i class="fa-solid fa-users nav-icon"></i> Pengguna</a>
