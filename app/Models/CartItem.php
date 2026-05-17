@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class CartItem extends Model
 {
@@ -11,8 +12,13 @@ class CartItem extends Model
     protected $fillable = [
         'cart_id',
         'product_id',
+        'product_variant_id', // varian yang dipilih user (nullable)
         'quantity',
-        'subtotal'
+        'subtotal',
+    ];
+
+    protected $casts = [
+        'subtotal' => 'decimal:2',
     ];
 
     public function product()
@@ -23,5 +29,14 @@ class CartItem extends Model
     public function cart()
     {
         return $this->belongsTo(Cart::class);
+    }
+
+    /**
+     * Varian yang dipilih user saat menambah item ke keranjang.
+     * Contoh: Pulpen Standard → varian Biru
+     */
+    public function variant()
+    {
+        return $this->belongsTo(ProductVariant::class, 'product_variant_id');
     }
 }
