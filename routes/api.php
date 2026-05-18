@@ -123,6 +123,11 @@ Route::middleware(['auth:sanctum', 'role:kurir'])->prefix('courier')->group(func
         ]);
     });
 
+    // Dashboard & Documents
+    Route::get('/dashboard',               [\App\Http\Controllers\Api\CourierDashboardController::class, 'index']);
+    Route::get('/documents',               [\App\Http\Controllers\Api\CourierDashboardController::class, 'getDocuments']);
+    Route::post('/documents',              [\App\Http\Controllers\Api\CourierDashboardController::class, 'updateDocuments']);
+
     // Courier Order Management
     Route::get('/orders',                  [\App\Http\Controllers\Api\CourierOrderController::class, 'index']);
     Route::patch('/orders/{id}/accept',    [\App\Http\Controllers\Api\CourierOrderController::class, 'accept']);
