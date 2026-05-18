@@ -88,48 +88,20 @@
     </style>
 </head>
 <body>
-<aside class="sidebar">
-    <div class="brand">
-        <div class="brand-icon"><i class="fa-solid fa-pen-nib"></i></div>
-        <div class="brand-name">Didi<span>Design</span></div>
-    </div>
-    <nav class="nav-menu">
-        <div class="nav-label">Main Menu</div>
-        <a href="{{ route('admin.dashboard') }}" class="nav-item"><i class="fa-solid fa-house nav-icon"></i> Dashboard</a>
-        <a href="{{ route('admin.products.index') }}" class="nav-item active"><i class="fa-solid fa-box-open nav-icon"></i> Produk</a>
-        <div class="nav-label">Transaksi</div>
-        <a href="#" class="nav-item"><i class="fa-solid fa-cart-shopping nav-icon"></i> Pesanan</a>
-        <a href="#" class="nav-item"><i class="fa-solid fa-print nav-icon"></i> Cetak File</a>
-        <div class="nav-label">Pengiriman</div>
-        <a href="{{ route('admin.couriers.index') }}" class="nav-item"><i class="fa-solid fa-motorcycle nav-icon"></i> Kurir</a>
-    </nav>
-    <div class="sidebar-footer">
-        <div class="user-profile">
-            <div class="user-avatar">{{ substr(Auth::user()->email, 0, 1) }}</div>
-            <div class="user-info">
-                <div class="user-name">Administrator</div>
-                <div class="user-role">{{ Auth::user()->email }}</div>
-            </div>
-            <form action="{{ route('admin.logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="btn-logout"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
-            </form>
-        </div>
-    </div>
-</aside>
+@include('admin.partials.sidebar')
 
 <main class="main-content">
     <div class="header">
         <h1 class="page-title">{{ isset($product) ? 'Edit Produk' : 'Tambah Produk Baru' }}</h1>
         <p class="breadcrumb">
             <a href="{{ route('admin.dashboard') }}">Dashboard</a> /
-            <a href="{{ route('admin.products.index') }}">Produk</a> /
+            <a href="{{ route('admin.produk.index') }}">Produk</a> /
             {{ isset($product) ? 'Edit' : 'Tambah' }}
         </p>
     </div>
 
     <form
-        action="{{ isset($product) ? route('admin.products.update', $product) : route('admin.products.store') }}"
+        action="{{ isset($product) ? route('admin.produk.update', $product) : route('admin.produk.store') }}"
         method="POST"
         enctype="multipart/form-data"
     >
@@ -285,7 +257,7 @@
                             {{ isset($product) ? 'Simpan Perubahan' : 'Simpan Produk' }}
                         </button>
                     </div>
-                    <a href="{{ route('admin.products.index') }}" class="btn-secondary" style="width:100%;justify-content:center;margin-top:10px;">
+                    <a href="{{ route('admin.produk.index') }}" class="btn-secondary" style="width:100%;justify-content:center;margin-top:10px;">
                         <i class="fa-solid fa-arrow-left"></i> Kembali
                     </a>
                 </div>

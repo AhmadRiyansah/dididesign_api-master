@@ -321,44 +321,7 @@
 <body>
 
     <!-- Sidebar -->
-    <aside class="sidebar">
-        <div class="brand">
-            <div class="brand-icon"><i class="fa-solid fa-pen-nib"></i></div>
-            <div class="brand-name">Didi<span>Design</span></div>
-        </div>
-
-        <nav class="nav-menu">
-            <div class="nav-label">Main Menu</div>
-            <a href="{{ route('admin.dashboard') }}" class="nav-item active"><i class="fa-solid fa-house nav-icon"></i> Dashboard</a>
-            <a href="{{ route('admin.products.index') }}" class="nav-item"><i class="fa-solid fa-box-open nav-icon"></i> Produk</a>
-            
-            <div class="nav-label">Transaksi</div>
-            <a href="#" class="nav-item"><i class="fa-solid fa-cart-shopping nav-icon"></i> Pesanan</a>
-            <a href="#" class="nav-item"><i class="fa-solid fa-print nav-icon"></i> Cetak File</a>
-            <a href="#" class="nav-item"><i class="fa-solid fa-money-bill-transfer nav-icon"></i> Pembayaran</a>
-
-            <div class="nav-label">Pengiriman</div>
-            <a href="{{ route('admin.couriers.index') }}" class="nav-item"><i class="fa-solid fa-motorcycle nav-icon"></i> Kurir</a>
-
-            <div class="nav-label">Pengaturan</div>
-            <a href="#" class="nav-item"><i class="fa-solid fa-users nav-icon"></i> Pengguna</a>
-            <a href="#" class="nav-item"><i class="fa-solid fa-gear nav-icon"></i> Sistem</a>
-        </nav>
-
-        <div class="sidebar-footer">
-            <div class="user-profile">
-                <div class="user-avatar">{{ substr(Auth::user()->email, 0, 1) }}</div>
-                <div class="user-info">
-                    <div class="user-name">Administrator</div>
-                    <div class="user-role">{{ Auth::user()->email }}</div>
-                </div>
-                <form action="{{ route('admin.logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="btn-logout" title="Logout"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
-                </form>
-            </div>
-        </div>
-    </aside>
+    @include('admin.partials.sidebar')
 
     <!-- Main Content -->
     <main class="main-content">
@@ -368,7 +331,7 @@
                 <p class="page-subtitle">Pantau performa Didi Design hari ini</p>
             </div>
             <div class="header-actions">
-                <a href="{{ route('admin.products.create') }}" class="btn-primary" style="text-decoration:none;"><i class="fa-solid fa-plus"></i> Produk Baru</a>
+                <a href="{{ route('admin.produk.create') }}" class="btn-primary" style="text-decoration:none;"><i class="fa-solid fa-plus"></i> Produk Baru</a>
             </div>
         </div>
 

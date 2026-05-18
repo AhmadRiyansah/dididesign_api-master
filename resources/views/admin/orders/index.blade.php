@@ -90,36 +90,7 @@
     </style>
 </head>
 <body>
-    <aside class="sidebar">
-        <div class="brand">
-            <div class="brand-icon"><i class="fa-solid fa-pen-nib"></i></div>
-            <div class="brand-name">Didi<span>Design</span></div>
-        </div>
-        <nav class="nav-menu">
-            <div class="nav-label">Main Menu</div>
-            <a href="{{ route('admin.dashboard') }}" class="nav-item"><i class="fa-solid fa-house nav-icon"></i> Dashboard</a>
-            <a href="{{ route('admin.products.index') }}" class="nav-item"><i class="fa-solid fa-box-open nav-icon"></i> Produk</a>
-            <div class="nav-label">Transaksi</div>
-            <a href="{{ route('admin.orders.index') }}" class="nav-item active">
-                <i class="fa-solid fa-cart-shopping nav-icon"></i> Pesanan
-                @if($unassignedCount > 0)<span class="nav-badge">{{ $unassignedCount }}</span>@endif
-            </a>
-            <div class="nav-label">Pengiriman</div>
-            <a href="{{ route('admin.couriers.index') }}" class="nav-item"><i class="fa-solid fa-motorcycle nav-icon"></i> Kurir</a>
-        </nav>
-        <div class="sidebar-footer">
-            <div class="user-profile">
-                <div class="user-avatar">{{ substr(Auth::user()->email, 0, 1) }}</div>
-                <div class="user-info">
-                    <div class="user-name">Administrator</div>
-                    <div class="user-role">{{ Auth::user()->email }}</div>
-                </div>
-                <form action="{{ route('admin.logout') }}" method="POST">@csrf
-                    <button type="submit" class="btn-logout" title="Logout"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
-                </form>
-            </div>
-        </div>
-    </aside>
+    @include('admin.partials.sidebar')
 
     <main class="main-content">
         <div class="header">
@@ -153,14 +124,14 @@
         </div>
 
         <div class="filter-tabs">
-            <a href="{{ route('admin.orders.index') }}" class="filter-tab {{ $status === 'all' ? 'active' : '' }}">Semua</a>
-            <a href="{{ route('admin.orders.index', ['status' => 'unassigned']) }}" class="filter-tab {{ $status === 'unassigned' ? 'active' : '' }}">
+            <a href="{{ route('admin.pesanan.index') }}" class="filter-tab {{ $status === 'all' ? 'active' : '' }}">Semua</a>
+            <a href="{{ route('admin.pesanan.index', ['status' => 'unassigned']) }}" class="filter-tab {{ $status === 'unassigned' ? 'active' : '' }}">
                 🔴 Belum Ada Kurir @if($unassignedCount > 0)<span class="filter-badge">{{ $unassignedCount }}</span>@endif
             </a>
-            <a href="{{ route('admin.orders.index', ['status' => 'process']) }}" class="filter-tab {{ $status === 'process' ? 'active' : '' }}">Diproses</a>
-            <a href="{{ route('admin.orders.index', ['status' => 'shipping']) }}" class="filter-tab {{ $status === 'shipping' ? 'active' : '' }}">Dikirim</a>
-            <a href="{{ route('admin.orders.index', ['status' => 'done']) }}" class="filter-tab {{ $status === 'done' ? 'active' : '' }}">Selesai</a>
-            <a href="{{ route('admin.orders.index', ['status' => 'cancel']) }}" class="filter-tab {{ $status === 'cancel' ? 'active' : '' }}">Dibatalkan</a>
+            <a href="{{ route('admin.pesanan.index', ['status' => 'process']) }}" class="filter-tab {{ $status === 'process' ? 'active' : '' }}">Diproses</a>
+            <a href="{{ route('admin.pesanan.index', ['status' => 'shipping']) }}" class="filter-tab {{ $status === 'shipping' ? 'active' : '' }}">Dikirim</a>
+            <a href="{{ route('admin.pesanan.index', ['status' => 'done']) }}" class="filter-tab {{ $status === 'done' ? 'active' : '' }}">Selesai</a>
+            <a href="{{ route('admin.pesanan.index', ['status' => 'cancel']) }}" class="filter-tab {{ $status === 'cancel' ? 'active' : '' }}">Dibatalkan</a>
         </div>
 
         <div class="panel">
@@ -192,7 +163,7 @@
                         </td>
                         <td>
                             @if(!$order->courier_id && $order->order_status === 'process')
-                                <form action="{{ route('admin.orders.assign', $order) }}" method="POST" class="assign-form">
+                                <form action="{{ route('admin.pesanan.assign', $order) }}" method="POST" class="assign-form">
                                     @csrf @method('PATCH')
                                     <select name="courier_id" class="assign-select" required>
                                         <option value="">Pilih Kurir</option>

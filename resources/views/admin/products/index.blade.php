@@ -73,35 +73,7 @@
     </style>
 </head>
 <body>
-<aside class="sidebar">
-    <div class="brand">
-        <div class="brand-icon"><i class="fa-solid fa-pen-nib"></i></div>
-        <div class="brand-name">Didi<span>Design</span></div>
-    </div>
-    <nav class="nav-menu">
-        <div class="nav-label">Main Menu</div>
-        <a href="{{ route('admin.dashboard') }}" class="nav-item"><i class="fa-solid fa-house nav-icon"></i> Dashboard</a>
-        <a href="{{ route('admin.products.index') }}" class="nav-item active"><i class="fa-solid fa-box-open nav-icon"></i> Produk</a>
-        <div class="nav-label">Transaksi</div>
-        <a href="#" class="nav-item"><i class="fa-solid fa-cart-shopping nav-icon"></i> Pesanan</a>
-        <a href="#" class="nav-item"><i class="fa-solid fa-print nav-icon"></i> Cetak File</a>
-        <div class="nav-label">Pengiriman</div>
-        <a href="#" class="nav-item"><i class="fa-solid fa-motorcycle nav-icon"></i> Kurir</a>
-    </nav>
-    <div class="sidebar-footer">
-        <div class="user-profile">
-            <div class="user-avatar">{{ substr(Auth::user()->email, 0, 1) }}</div>
-            <div class="user-info">
-                <div class="user-name">Administrator</div>
-                <div class="user-role">{{ Auth::user()->email }}</div>
-            </div>
-            <form action="{{ route('admin.logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="btn-logout" title="Logout"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
-            </form>
-        </div>
-    </div>
-</aside>
+@include('admin.partials.sidebar')
 
 <main class="main-content">
     <div class="header">
@@ -109,7 +81,7 @@
             <h1 class="page-title">Manajemen Produk</h1>
             <p class="breadcrumb"><a href="{{ route('admin.dashboard') }}">Dashboard</a> / Produk</p>
         </div>
-        <a href="{{ route('admin.products.create') }}" class="btn-primary">
+        <a href="{{ route('admin.produk.create') }}" class="btn-primary">
             <i class="fa-solid fa-plus"></i> Tambah Produk
         </a>
     </div>
@@ -165,8 +137,8 @@
                     <td><span class="badge {{ $product->is_new_arrival ? 'badge-new' : 'badge-no' }}">{{ $product->is_new_arrival ? 'Ya' : 'Tidak' }}</span></td>
                     <td>
                         <div class="action-btns">
-                            <a href="{{ route('admin.products.edit', $product) }}" class="btn-edit"><i class="fa-solid fa-pen"></i> Edit</a>
-                            <form action="{{ route('admin.products.destroy', $product) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus produk ini?')">
+                            <a href="{{ route('admin.produk.edit', $product) }}" class="btn-edit"><i class="fa-solid fa-pen"></i> Edit</a>
+                            <form action="{{ route('admin.produk.destroy', $product) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus produk ini?')">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="btn-delete"><i class="fa-solid fa-trash"></i> Hapus</button>
                             </form>
@@ -187,7 +159,7 @@
         <div class="empty-state">
             <i class="fa-solid fa-box-open"></i>
             <p>Belum ada produk. Mulai tambahkan produk pertama Anda!</p>
-            <a href="{{ route('admin.products.create') }}" class="btn-primary" style="display:inline-flex;">
+            <a href="{{ route('admin.produk.create') }}" class="btn-primary" style="display:inline-flex;">
                 <i class="fa-solid fa-plus"></i> Tambah Produk Pertama
             </a>
         </div>

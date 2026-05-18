@@ -102,32 +102,7 @@
 </head>
 <body>
 
-<aside class="sidebar">
-    <div class="brand">
-        <div class="brand-icon"><i class="fa-solid fa-pen-nib"></i></div>
-        <div class="brand-name">Didi<span>Design</span></div>
-    </div>
-    <nav class="nav-menu">
-        <div class="nav-label">Main Menu</div>
-        <a href="{{ route('admin.dashboard') }}" class="nav-item"><i class="fa-solid fa-house nav-icon"></i> Dashboard</a>
-        <a href="{{ route('admin.products.index') }}" class="nav-item"><i class="fa-solid fa-box-open nav-icon"></i> Produk</a>
-        <div class="nav-label">Pengiriman</div>
-        <a href="{{ route('admin.couriers.index') }}" class="nav-item active"><i class="fa-solid fa-motorcycle nav-icon"></i> Kurir</a>
-    </nav>
-    <div class="sidebar-footer">
-        <div class="user-profile">
-            <div class="user-avatar">{{ substr(Auth::user()->email, 0, 1) }}</div>
-            <div class="user-info">
-                <div class="user-name">Administrator</div>
-                <div class="user-role">{{ Auth::user()->email }}</div>
-            </div>
-            <form action="{{ route('admin.logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="btn-logout"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
-            </form>
-        </div>
-    </div>
-</aside>
+@include('admin.partials.sidebar')
 
 <main class="main-content">
     <div class="header">
@@ -137,7 +112,7 @@
                 <a href="{{ route('admin.dashboard') }}">Dashboard</a> / Kurir
             </p>
         </div>
-        <a href="{{ route('admin.couriers.create') }}" class="btn-primary">
+        <a href="{{ route('admin.kurir.create') }}" class="btn-primary">
             <i class="fa-solid fa-plus"></i> Tambah Kurir
         </a>
     </div>
@@ -218,7 +193,7 @@
                     </td>
                     <td>
                         <div class="action-group">
-                            <form action="{{ route('admin.couriers.toggle', $courier) }}" method="POST">
+                            <form action="{{ route('admin.kurir.toggle', $courier) }}" method="POST">
                                 @csrf @method('PATCH')
                                 @if($courier->is_available)
                                     <button type="submit" class="btn-toggle btn-deactivate"><i class="fa-solid fa-pause"></i> Nonaktifkan</button>
@@ -226,7 +201,7 @@
                                     <button type="submit" class="btn-toggle btn-activate"><i class="fa-solid fa-play"></i> Aktifkan</button>
                                 @endif
                             </form>
-                            <form action="{{ route('admin.couriers.destroy', $courier) }}" method="POST" onsubmit="return confirm('Yakin hapus kurir ini?')">
+                            <form action="{{ route('admin.kurir.destroy', $courier) }}" method="POST" onsubmit="return confirm('Yakin hapus kurir ini?')">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="btn-delete"><i class="fa-solid fa-trash"></i></button>
                             </form>
