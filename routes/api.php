@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\ProductVariantController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AddressController;
 
 /*
 |--------------------------------------------------------------------------
@@ -92,6 +93,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/print-orders/{id}/cancel',  [PrintOrderController::class, 'cancel']);
 
 });
+
+/*
+|--------------------------------------------------------------------------
+| Users (mobile)
+|--------------------------------------------------------------------------
+*/ 
+
+Route::post('/alamat', [AddressController::class, 'store']);
+Route::get('/alamat', [AddressController::class, 'index']);
 
 
 

@@ -7,19 +7,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Address extends Model
 {
-    protected $fillable = [
-        'user_id',
-        'label',
-        'recipient_name',
-        'phone',
-        'address_line',
-        'city',
-        'postal_code',
-        'is_default',
-        'latitude',
-        'longitude',
-    ];
-
+   protected $fillable = [
+    'name',
+    'address',
+    'latitude',
+    'longitude',
+];
     protected function casts(): array
     {
         return [
