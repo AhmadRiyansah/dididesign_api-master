@@ -14,13 +14,13 @@ class AdminProductController extends Controller
     public function index()
     {
         $products = Product::with('category', 'variants')->latest()->paginate(15);
-        return view('admin.produk.index', compact('products'));
+        return view('admin.products.index', compact('products'));
     }
 
     public function create()
     {
         $categories = Category::orderBy('name')->get();
-        return view('admin.produk.create', compact('categories'));
+        return view('admin.products.create', compact('categories'));
     }
 
     public function store(Request $request)
@@ -83,7 +83,7 @@ class AdminProductController extends Controller
     {
         $categories = Category::orderBy('name')->get();
         $product->load('variants');
-        return view('admin.produk.create', compact('product', 'categories'));
+        return view('admin.products.create', compact('product', 'categories'));
     }
 
     public function update(Request $request, Product $product)

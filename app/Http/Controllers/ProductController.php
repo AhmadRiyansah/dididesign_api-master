@@ -13,7 +13,7 @@ class ProductController extends Controller
     public function index()
     {
         try {
-            $products = Product::with('category', 'images')->paginate(15);
+            $products = Product::with('category', 'images', 'variants')->paginate(15);
             
             return response()->json([
                 'success' => true,
@@ -79,7 +79,7 @@ class ProductController extends Controller
     public function show($id)
     {
         try {
-            $product = Product::with('category', 'images')->findOrFail($id);
+            $product = Product::with('category', 'images', 'variants')->findOrFail($id);
 
             return response()->json([
                 'success' => true,
@@ -198,7 +198,7 @@ class ProductController extends Controller
             $category = $request->input('category_id');
 
             $products = Product::query()
-                ->with('category', 'images')
+                ->with('category', 'images', 'variants')
                 ->when($query, function ($q) use ($query) {
                     return $q->where('name', 'like', "%{$query}%")
                         ->orWhere('description', 'like', "%{$query}%");
@@ -228,7 +228,7 @@ class ProductController extends Controller
     public function popular()
     {
         try {
-            $products = Product::with('category', 'images')
+            $products = Product::with('category', 'images', 'variants')
                 ->where('is_popular', true)
                 ->paginate(10);
 
@@ -252,7 +252,7 @@ class ProductController extends Controller
     public function newArrivals()
     {
         try {
-            $products = Product::with('category', 'images')
+            $products = Product::with('category', 'images', 'variants')
                 ->where('is_new_arrival', true)
                 ->orderBy('created_at', 'desc')
                 ->paginate(10);

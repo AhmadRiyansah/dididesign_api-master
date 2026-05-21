@@ -21,7 +21,7 @@ class OrderController extends Controller
     public function index(Request $request): JsonResponse
     {
         $query = Order::where('user_id', $request->user()->id)
-            ->with(['items.product'])
+            ->with(['items.product', 'items.variant'])
             ->latest();
 
         if ($request->has('status') && $request->status !== 'all') {
@@ -39,7 +39,7 @@ class OrderController extends Controller
     public function show(Request $request, int $id): JsonResponse
     {
         $order = Order::where('user_id', $request->user()->id)
-            ->with(['items.product'])
+            ->with(['items.product', 'items.variant'])
             ->findOrFail($id);
 
         return response()->json(['data' => $this->formatOrder($order)]);
@@ -58,8 +58,8 @@ class OrderController extends Controller
 
         $user = $request->user();
 
-        // Ambil keranjang
-        $cart = Cart::where('user_id', $user->id)->with('items.product')->first();
+        // Ambil keranjang dengan eager loading produk dan varian
+        $cart = Cart::where('user_id', $user->id)->with(['items.product', 'items.variant'])->first();
 
         if (!$cart || $cart->items->isEmpty()) {
             return response()->json(['message' => 'Keranjang kosong.'], 422);
@@ -86,11 +86,12 @@ class OrderController extends Controller
         // Salin items dari keranjang ke order_items
         foreach ($cart->items as $cartItem) {
             OrderItem::create([
-                'order_id'   => $order->id,
-                'product_id' => $cartItem->product_id,
-                'quantity'   => $cartItem->quantity,
-                'price'      => $cartItem->product->price,
-                'subtotal'   => $cartItem->subtotal,
+                'order_id'           => $order->id,
+                'product_id'         => $cartItem->product_id,
+                'product_variant_id' => $cartItem->product_variant_id,
+                'quantity'           => $cartItem->quantity,
+                'price'              => $cartItem->product_variant_id ? ($cartItem->variant?->harga ?? $cartItem->product->price) : $cartItem->product->price,
+                'subtotal'           => $cartItem->subtotal,
             ]);
         }
 
@@ -112,7 +113,7 @@ class OrderController extends Controller
 
         return response()->json([
             'message' => 'Pesanan berhasil dibuat.',
-            'data'    => $this->formatOrder($order->fresh(['items.product', 'courier.profile'])),
+            'data'    => $this->formatOrder($order->fresh(['items.product', 'items.variant', 'courier.profile'])),
         ], 201);
     }
 
@@ -169,7 +170,8 @@ class OrderController extends Controller
                 'price'        => (float) $i->price,
                 'subtotal'     => (float) $i->subtotal,
                 'product_name' => $i->product?->name,
-                'product_image'=> $i->product?->image,
+                'product_image'=> $i->variant?->image ?? $i->product?->image,
+                'variant_name' => $i->variant?->nama_varian,
             ])->toArray(),
         ];
     }

@@ -36,12 +36,12 @@ class CartController extends Controller
                     'image'         => $product->image,
                     'category_name' => $product->category?->name,
                 ] : null,
-                // Varian yang dipilih (null jika produk tanpa varian)
                 'variant'    => $variant ? [
                     'id'          => $variant->id,
                     'nama_varian' => $variant->nama_varian,
                     'harga'       => $variant->harga,
                     'stok'        => $variant->stok,
+                    'image'       => $variant->image,
                 ] : null,
             ];
         });
