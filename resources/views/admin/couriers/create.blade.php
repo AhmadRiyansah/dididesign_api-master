@@ -61,43 +61,18 @@
 </head>
 <body>
 
-<aside class="sidebar">
-    <div class="brand">
-        <div class="brand-icon"><i class="fa-solid fa-pen-nib"></i></div>
-        <div class="brand-name">Didi<span>Design</span></div>
-    </div>
-    <nav class="nav-menu">
-        <div class="nav-label">Main Menu</div>
-        <a href="{{ route('admin.dashboard') }}" class="nav-item"><i class="fa-solid fa-house nav-icon"></i> Dashboard</a>
-        <a href="{{ route('admin.products.index') }}" class="nav-item"><i class="fa-solid fa-box-open nav-icon"></i> Produk</a>
-        <div class="nav-label">Pengiriman</div>
-        <a href="{{ route('admin.couriers.index') }}" class="nav-item active"><i class="fa-solid fa-motorcycle nav-icon"></i> Kurir</a>
-    </nav>
-    <div class="sidebar-footer">
-        <div class="user-profile">
-            <div class="user-avatar">{{ substr(Auth::user()->email, 0, 1) }}</div>
-            <div class="user-info">
-                <div class="user-name">Administrator</div>
-                <div class="user-role">{{ Auth::user()->email }}</div>
-            </div>
-            <form action="{{ route('admin.logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="btn-logout"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
-            </form>
-        </div>
-    </div>
-</aside>
+@include('admin.partials.sidebar')
 
 <main class="main-content">
     <div class="header">
         <h1 class="page-title">Tambah Kurir Baru</h1>
         <p class="breadcrumb">
             <a href="{{ route('admin.dashboard') }}">Dashboard</a> /
-            <a href="{{ route('admin.couriers.index') }}">Kurir</a> / Tambah
+            <a href="{{ route('admin.kurir.index') }}">Kurir</a> / Tambah
         </p>
     </div>
 
-    <form action="{{ route('admin.couriers.store') }}" method="POST">
+    <form action="{{ route('admin.kurir.store') }}" method="POST">
         @csrf
         <div class="form-grid">
             <div>
@@ -151,7 +126,7 @@
                 <div class="panel">
                     <div class="panel-title"><i class="fa-solid fa-floppy-disk"></i> Simpan</div>
                     <button type="submit" class="btn-primary"><i class="fa-solid fa-plus"></i> Tambah Kurir</button>
-                    <a href="{{ route('admin.couriers.index') }}" class="btn-secondary"><i class="fa-solid fa-arrow-left"></i> Kembali</a>
+                    <a href="{{ route('admin.kurir.index') }}" class="btn-secondary"><i class="fa-solid fa-arrow-left"></i> Kembali</a>
                 </div>
             </div>
         </div>

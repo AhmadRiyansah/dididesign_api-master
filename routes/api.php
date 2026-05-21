@@ -99,10 +99,15 @@ Route::middleware('auth:sanctum')->group(function () {
 | Users (mobile)
 |--------------------------------------------------------------------------
 */ 
-
-Route::post('/alamat', [AddressController::class, 'store']);
-Route::get('/alamat', [AddressController::class, 'index']);
-
+//alamat
+Route::post('/addresses', [AddressController::class, 'store']);
+Route::get('/addresses', [AddressController::class, 'index']);
+// Route::post('/addresses', function (Request $request) {
+//     return response()->json([
+//         "status" => "POST MASUK",
+//         "data" => $request->all()
+//     ]);
+// });
 
 
 /*
@@ -133,6 +138,11 @@ Route::middleware(['auth:sanctum', 'role:kurir'])->prefix('courier')->group(func
         ]);
     });
 
+    // Dashboard & Documents
+    Route::get('/dashboard',               [\App\Http\Controllers\Api\CourierDashboardController::class, 'index']);
+    Route::get('/documents',               [\App\Http\Controllers\Api\CourierDashboardController::class, 'getDocuments']);
+    Route::post('/documents',              [\App\Http\Controllers\Api\CourierDashboardController::class, 'updateDocuments']);
+
     // Courier Order Management
     Route::get('/orders',                  [\App\Http\Controllers\Api\CourierOrderController::class, 'index']);
     Route::patch('/orders/{id}/accept',    [\App\Http\Controllers\Api\CourierOrderController::class, 'accept']);
@@ -151,6 +161,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::get('/couriers',                          [AdminCourierController::class, 'index']);
     Route::post('/couriers',                         [AdminCourierController::class, 'store']);
     Route::patch('/couriers/{courier}/availability', [AdminCourierController::class, 'updateAvailability']);
+    
 
     // Manual assign kurir ke pesanan
     Route::patch('/orders/{id}/assign-courier', function (Request $request, int $id) {
