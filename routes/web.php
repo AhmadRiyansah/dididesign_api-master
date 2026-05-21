@@ -26,7 +26,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
         // Manajemen Produk
-        Route::resource('produk', AdminProductController::class)->names('produk')->parameters(['produk' => 'product']);
+        Route::get('/produk', [AdminProductController::class, 'index'])->name('produk.index');
+        Route::get('/produk/create', [AdminProductController::class, 'create'])->name('produk.create');
+        Route::post('/produk', [AdminProductController::class, 'store'])->name('produk.store');
+        Route::get('/produk/{product}/edit', [AdminProductController::class, 'edit'])->name('produk.edit');
+        Route::put('/produk/{product}', [AdminProductController::class, 'update'])->name('produk.update');
+        Route::delete('/produk/{product}', [AdminProductController::class, 'destroy'])->name('produk.destroy');
+        
+
         
         // Manajemen Kategori
         Route::get('/kategori', [AdminCategoryController::class, 'index'])->name('kategori.index');
@@ -53,11 +60,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/laporan', [AdminReportController::class, 'index'])->name('laporan.index');
 
         // Manajemen Cetak File
-        Route::get('/cetak-file',                [\App\Http\Controllers\AdminPrintOrderController::class, 'index'])->name('cetak-file.index');
-        Route::patch('/cetak-file/{printOrder}/status', [\App\Http\Controllers\AdminPrintOrderController::class, 'updateStatus'])->name('cetak-file.status');
+        Route::get('/cetak-file',                [\App\Http\Controllers\AdminPrintOrderController::class, 'index'])->name('print-orders.index');
+        Route::patch('/cetak-file/{printOrder}/status', [\App\Http\Controllers\AdminPrintOrderController::class, 'updateStatus'])->name('print-orders.status');
+
 
         // Manajemen Pengguna
-        Route::get('/pengguna',                       [\App\Http\Controllers\AdminUserController::class, 'index'])->name('pengguna.index');
-        Route::delete('/pengguna/{user}',             [\App\Http\Controllers\AdminUserController::class, 'destroy'])->name('pengguna.destroy');
+        Route::get('/pengguna',                       [\App\Http\Controllers\AdminUserController::class, 'index'])->name('users.index');
+        Route::delete('/pengguna/{user}',             [\App\Http\Controllers\AdminUserController::class, 'destroy'])->name('users.destroy');
     });
 });

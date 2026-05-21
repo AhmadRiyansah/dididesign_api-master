@@ -13,7 +13,7 @@
         <div class="nav-label">Transaksi</div>
         <a href="{{ route('admin.pesanan.index') }}" class="nav-item {{ request()->routeIs('admin.pesanan.*') ? 'active' : '' }}"><i class="fa-solid fa-cart-shopping nav-icon"></i> Pesanan</a>
         <a href="{{ route('admin.pembayaran.index') }}" class="nav-item {{ request()->routeIs('admin.pembayaran.*') ? 'active' : '' }}"><i class="fa-solid fa-money-bill-transfer nav-icon"></i> Pembayaran</a>
-        <a href="{{ route('admin.cetak-file.index') }}" class="nav-item {{ request()->routeIs('admin.cetak-file.*') ? 'active' : '' }}"><i class="fa-solid fa-print nav-icon"></i> Cetak File</a>
+        <a href="{{ route('admin.print-orders.index') }}" class="nav-item {{ request()->routeIs('admin.print-orders.*') ? 'active' : '' }}"><i class="fa-solid fa-print nav-icon"></i> Cetak File</a>
 
         <div class="nav-label">Pengiriman</div>
         <a href="{{ route('admin.kurir.index') }}" class="nav-item {{ request()->routeIs('admin.kurir.*') ? 'active' : '' }}"><i class="fa-solid fa-motorcycle nav-icon"></i> Kurir</a>
@@ -22,7 +22,7 @@
         <a href="{{ route('admin.laporan.index') }}" class="nav-item {{ request()->routeIs('admin.laporan.*') ? 'active' : '' }}"><i class="fa-solid fa-chart-line nav-icon"></i> Laporan</a>
 
         <div class="nav-label">Pengaturan</div>
-        <a href="{{ route('admin.pengguna.index') }}" class="nav-item {{ request()->routeIs('admin.pengguna.*') ? 'active' : '' }}"><i class="fa-solid fa-users nav-icon"></i> Pengguna</a>
+        <a href="{{ route('admin.users.index') }}" class="nav-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}"><i class="fa-solid fa-users nav-icon"></i> Pengguna</a>
     </nav>
     <div class="sidebar-footer">
         <div class="user-profile">

@@ -18,7 +18,7 @@
             <p class="breadcrumb"><a href="{{ route('admin.dashboard') }}">Dashboard</a> / Pengguna</p>
         </div>
         <div class="filter-bar">
-            <a href="{{ route('admin.pengguna.index') }}" class="filter-btn {{ !request('role') ? 'active' : '' }}">Semua</a>
+            <a href="{{ route('admin.users.index') }}" class="filter-btn {{ !request('role') ? 'active' : '' }}">Semua</a>
             <a href="{{ route('admin.users.index', ['role'=>'user']) }}" class="filter-btn {{ request('role')==='user' ? 'active' : '' }}">Customer</a>
             <a href="{{ route('admin.users.index', ['role'=>'kurir']) }}" class="filter-btn {{ request('role')==='kurir' ? 'active' : '' }}">Kurir</a>
             <a href="{{ route('admin.users.index', ['role'=>'admin']) }}" class="filter-btn {{ request('role')==='admin' ? 'active' : '' }}">Admin</a>
@@ -74,7 +74,7 @@
                 <td style="font-size:13px;">{{ $user->created_at->format('d M Y') }}</td>
                 <td>
                     @if(($user->role->value ?? $user->role) !== 'admin')
-                    <form action="{{ route('admin.pengguna.destroy', $user) }}" method="POST" onsubmit="return confirm('Yakin hapus pengguna ini?')">
+                    <form action="{{ route('admin.users.destroy', $user) }}" method="POST" onsubmit="return confirm('Yakin hapus pengguna ini?')">
                         @csrf @method('DELETE')
                         <button type="submit" class="btn-delete"><i class="fa-solid fa-trash"></i></button>
                     </form>

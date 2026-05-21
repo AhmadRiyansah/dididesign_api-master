@@ -18,7 +18,7 @@
             <p class="breadcrumb"><a href="{{ route('admin.dashboard') }}">Dashboard</a> / Cetak File</p>
         </div>
         <div class="filter-bar">
-            <a href="{{ route('admin.cetak-file.index') }}" class="filter-btn {{ !request('status') ? 'active' : '' }}">Semua</a>
+            <a href="{{ route('admin.print-orders.index') }}" class="filter-btn {{ !request('status') ? 'active' : '' }}">Semua</a>
             <a href="{{ route('admin.print-orders.index', ['status'=>'process']) }}" class="filter-btn {{ request('status')==='process' ? 'active' : '' }}">Diproses</a>
             <a href="{{ route('admin.print-orders.index', ['status'=>'printing']) }}" class="filter-btn {{ request('status')==='printing' ? 'active' : '' }}">Dicetak</a>
             <a href="{{ route('admin.print-orders.index', ['status'=>'done']) }}" class="filter-btn {{ request('status')==='done' ? 'active' : '' }}">Selesai</a>

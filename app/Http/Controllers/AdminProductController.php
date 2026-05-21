@@ -14,13 +14,13 @@ class AdminProductController extends Controller
     public function index()
     {
         $products = Product::with('category', 'variants')->latest()->paginate(15);
-        return view('admin.products.index', compact('products'));
+        return view('admin.produk.index', compact('products'));
     }
 
     public function create()
     {
         $categories = Category::orderBy('name')->get();
-        return view('admin.products.create', compact('categories'));
+        return view('admin.produk.create', compact('categories'));
     }
 
     public function store(Request $request)
@@ -75,7 +75,7 @@ class AdminProductController extends Controller
             }
         });
 
-        return redirect()->route('admin.products.index')
+        return redirect()->route('admin.produk.index')
             ->with('success', 'Produk berhasil ditambahkan!');
     }
 
@@ -83,7 +83,7 @@ class AdminProductController extends Controller
     {
         $categories = Category::orderBy('name')->get();
         $product->load('variants');
-        return view('admin.products.create', compact('product', 'categories'));
+        return view('admin.produk.create', compact('product', 'categories'));
     }
 
     public function update(Request $request, Product $product)
@@ -147,7 +147,7 @@ class AdminProductController extends Controller
             }
         });
 
-        return redirect()->route('admin.products.index')
+        return redirect()->route('admin.produk.index')
             ->with('success', 'Produk berhasil diperbarui!');
     }
 
@@ -167,7 +167,7 @@ class AdminProductController extends Controller
 
         $product->delete(); // cascade hapus varian via FK
 
-        return redirect()->route('admin.products.index')
+        return redirect()->route('admin.produk.index')
             ->with('success', 'Produk berhasil dihapus!');
     }
 }

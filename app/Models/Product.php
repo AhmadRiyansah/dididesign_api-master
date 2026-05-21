@@ -49,4 +49,12 @@ class Product extends Model
     {
         return $this->hasMany(ProductVariant::class);
     }
+
+    /**
+     * Satu produk dapat dibeli di banyak baris order (one-to-many).
+     */
+    public function orderItems(): HasMany
+    {
+        return $this->hasMany(OrderItem::class);
+    }
 }
