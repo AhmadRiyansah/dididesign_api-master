@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AddressController;
 
+
 /*
 |--------------------------------------------------------------------------
 | Public Routes (tidak perlu login)
@@ -115,6 +116,10 @@ Route::get('/addresses', [AddressController::class, 'index']);
 | Kurir (mobile)
 |--------------------------------------------------------------------------
 */
+
+
+Route::post('/courier/update-location/{id}', [AdminCourierController::class, 'updateLocation']);
+Route::get('/courier/location/{id}', [AdminCourierController::class, 'getLocation']);
 
 Route::middleware(['auth:sanctum', 'role:kurir'])->prefix('courier')->group(function () {
     Route::patch('/availability', function (Request $request) {
