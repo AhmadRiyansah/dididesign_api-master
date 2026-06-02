@@ -8,15 +8,13 @@ use App\Models\PrintOrder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Midtrans\Config;
+use Midtrans\Snap;
 
 class PrintOrderController extends Controller
 {
     // ── Tabel Harga ──────────────────────────────────────────────────────────
 
-    /**
-     * Hitung harga berdasarkan service_type dan spesifikasi.
-     * Return: [unit_price, binding_cost, total_price]
-     */
     private function calculatePrice(array $data): array
     {
         $serviceType = $data['service_type'];
@@ -32,20 +30,16 @@ class PrintOrderController extends Controller
         $bindingCost = 0;
 
         switch ($serviceType) {
-
-            // ── Spanduk: Rp 25.000 per m² ──────────────────────────────────
             case 'spanduk':
-                $area      = $widthMeter * $heightMeter; // m²
+                $area      = $widthMeter * $heightMeter;
                 $unitPrice = 25000 * $area;
                 $total     = $unitPrice * $quantity;
                 return ['unit_price' => $unitPrice, 'binding_cost' => 0, 'total_price' => $total];
 
-            // ── Undangan: Rp 2.000 – 10.000 (warna = mahal) ────────────────
             case 'undangan':
                 $unitPrice = $inkType === 'bw' ? 2000 : 6000;
                 break;
 
-            // ── Brosur ──────────────────────────────────────────────────────
             case 'brosur':
                 $sideMultiplier = $sides === 'double' ? 1.6 : 1.0;
                 $priceMap = [
@@ -57,14 +51,12 @@ class PrintOrderController extends Controller
                 $unitPrice = $basePrice * $sideMultiplier;
                 break;
 
-            // ── Kartu Nama: Rp 85.000 per box (100 lembar) ─────────────────
             case 'kartu_nama':
-                $boxes     = ceil($quantity / 100);    // hitung per box
-                $unitPrice = 85000;                    // per box
+                $boxes     = ceil($quantity / 100);
+                $unitPrice = 85000;
                 $total     = $unitPrice * $boxes;
                 return ['unit_price' => $unitPrice, 'binding_cost' => 0, 'total_price' => $total];
 
-            // ── Cetak File (dokumen biasa) ──────────────────────────────────
             case 'cetak_file':
             default:
                 $priceMap = [
@@ -76,7 +68,6 @@ class PrintOrderController extends Controller
                 break;
         }
 
-        // Biaya penjilidan (untuk brosur, cetak_file, undangan)
         $bindingMap = [
             'none'       => 0,
             'staples'    => 2000,
@@ -96,10 +87,6 @@ class PrintOrderController extends Controller
 
     // ── Endpoints ─────────────────────────────────────────────────────────────
 
-    /**
-     * Estimasi harga tanpa membuat order.
-     * POST /api/print-orders/estimate
-     */
     public function estimate(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -121,10 +108,6 @@ class PrintOrderController extends Controller
         ]);
     }
 
-    /**
-     * Buat pesanan cetak baru.
-     * POST /api/print-orders
-     */
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -143,7 +126,6 @@ class PrintOrderController extends Controller
 
         $user = $request->user();
 
-        // Upload file jika ada
         $filePath = null;
         $fileName = null;
         if ($request->hasFile('file')) {
@@ -151,7 +133,6 @@ class PrintOrderController extends Controller
             $fileName = $request->file('file')->getClientOriginalName();
         }
 
-        // Hitung harga
         $price = $this->calculatePrice($validated);
 
         $order = PrintOrder::create([
@@ -176,7 +157,6 @@ class PrintOrderController extends Controller
             'notes'          => $validated['notes'] ?? null,
         ]);
 
-        // Notifikasi
         Notification::create([
             'user_id' => $user->id,
             'title'   => 'Pesanan Cetak Dibuat',
@@ -192,10 +172,6 @@ class PrintOrderController extends Controller
         ], 201);
     }
 
-    /**
-     * Daftar pesanan cetak milik user.
-     * GET /api/print-orders
-     */
     public function index(Request $request): JsonResponse
     {
         $orders = PrintOrder::where('user_id', $request->user()->id)
@@ -206,20 +182,12 @@ class PrintOrderController extends Controller
         return response()->json(['data' => $orders]);
     }
 
-    /**
-     * Detail pesanan cetak.
-     * GET /api/print-orders/{id}
-     */
     public function show(Request $request, int $id): JsonResponse
     {
         $order = PrintOrder::where('user_id', $request->user()->id)->findOrFail($id);
         return response()->json(['data' => $this->formatOrder($order)]);
     }
 
-    /**
-     * Batalkan pesanan cetak.
-     * PATCH /api/print-orders/{id}/cancel
-     */
     public function cancel(Request $request, int $id): JsonResponse
     {
         $order = PrintOrder::where('user_id', $request->user()->id)->findOrFail($id);
@@ -233,7 +201,135 @@ class PrintOrderController extends Controller
         return response()->json(['message' => 'Pesanan cetak berhasil dibatalkan.']);
     }
 
-    // ── Helper ────────────────────────────────────────────────────────────────
+    /**
+     * Generate Snap Token untuk Payment (WebView).
+     * POST /api/print-orders/{id}/qris-token
+     * Return: snap_token untuk buka halaman Midtrans Snap
+     */
+    public function generateQrisToken(Request $request, int $id): JsonResponse
+    {
+        try {
+            // 1. Setup Config Midtrans
+            Config::$serverKey = config('services.midtrans.server_key');
+            Config::$isProduction = config('services.midtrans.is_production');
+            Config::$isSanitized = config('services.midtrans.is_sanitized');
+            Config::$is3ds = config('services.midtrans.is_3ds');
+
+            // 2. Ambil Order
+            $order = PrintOrder::where('id', $id)
+                ->where('user_id', $request->user()->id)
+                ->first();
+            
+            if (!$order) {
+                return response()->json(['message' => 'Order tidak ditemukan'], 404);
+            }
+
+            // 3. Siapkan Parameter Snap
+            $params = [
+                'transaction_details' => [
+                    'order_id' => $order->order_code,
+                    'gross_amount' => (int) $order->total_price,
+                ],
+                'item_details' => [[
+                    'id' => $order->service_type,
+                    'price' => (int) $order->total_price,
+                    'quantity' => 1,
+                    'name' => "Order " . $order->order_code,
+                ]],
+                'customer_details' => [
+                    'first_name' => $request->user()->name ?? 'User',
+                    'email' => $request->user()->email ?? 'user@example.com',
+                ],
+            ];
+
+            // 4. Request Token ke Midtrans (Snap API)
+            $snapToken = Snap::createTransaction($params)->token;
+
+            return response()->json([
+                'status' => 'success',
+                'data' => ['snap_token' => $snapToken]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal generate token: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Get QRIS payment string for Midtrans Simulator.
+     * POST /api/print-orders/{id}/qris-string
+     */
+    public function getQrisString(Request $request, int $id): JsonResponse
+    {
+        Config::$serverKey = config('services.midtrans.server_key');
+        Config::$isProduction = config('services.midtrans.is_production');
+        
+        $order = PrintOrder::where('id', $id)
+            ->where('user_id', $request->user()->id)
+            ->first();
+        
+        if (!$order) {
+            return response()->json(['message' => 'Order not found'], 404);
+        }
+        
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => "https://api.sandbox.midtrans.com/v2/{$order->order_code}/qris",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => [
+                'Accept: application/json',
+                'Content-Type: application/json',
+                'Authorization: Basic ' . base64_encode(config('services.midtrans.server_key') . ':'),
+            ],
+        ]);
+        
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        
+        if ($httpCode == 200 || $httpCode == 201) {
+            $data = json_decode($response, true);
+            
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'qr_string' => $data['qr_string'] ?? null,
+                    'actions' => $data['actions'] ?? null,
+                ]
+            ]);
+        }
+        
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Gagal mendapatkan QRIS string',
+            'response' => json_decode($response, true),
+        ], 500);
+    }
+
+    /**
+     * Cek status pembayaran order.
+     * GET /api/print-orders/{orderCode}/payment-status
+     */
+    public function checkPaymentStatus(Request $request, string $orderCode): JsonResponse
+    {
+        $order = PrintOrder::where('order_code', $orderCode)
+            ->where('user_id', $request->user()->id)
+            ->first();
+        
+        if (!$order) {
+            return response()->json(['message' => 'Order not found'], 404);
+        }
+        
+        return response()->json([
+            'status' => $order->payment_status,
+            'is_paid' => $order->payment_status === 'success',
+        ]);
+    }
+
+    // ── Helper ───────────────────────────────────────────────────────────────
 
     private function formatOrder(PrintOrder $order): array
     {
@@ -243,9 +339,7 @@ class PrintOrderController extends Controller
             'service_type'   => $order->service_type,
             'service_label'  => $order->service_label,
             'file_name'      => $order->file_name,
-            'file_url'       => $order->file_path
-                                ? asset('storage/' . $order->file_path)
-                                : null,
+            'file_url'       => $order->file_path ? asset('storage/' . $order->file_path) : null,
             'paper_size'     => $order->paper_size,
             'ink_type'       => $order->ink_type,
             'binding'        => $order->binding,

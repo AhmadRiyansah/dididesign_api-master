@@ -92,6 +92,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/print-orders',               [PrintOrderController::class, 'store']);
     Route::get('/print-orders/{id}',           [PrintOrderController::class, 'show']);
     Route::patch('/print-orders/{id}/cancel',  [PrintOrderController::class, 'cancel']);
+    Route::post('/print-orders/{id}/qris-token', [App\Http\Controllers\Api\PrintOrderController::class, 'generateQrisToken']);
+    
+    // ── TAMBAH 2 ROUTE BARU INI ──
+    Route::get('/print-orders/{orderCode}/payment-status', [PrintOrderController::class, 'checkPaymentStatus']);
+    Route::post('/print-orders/{id}/qris-string', [App\Http\Controllers\Api\PrintOrderController::class, 'getQrisString']);
+    // ─────────────────────────────
 
 });
 
