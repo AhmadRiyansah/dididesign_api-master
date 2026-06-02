@@ -98,6 +98,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/print-orders/{orderCode}/payment-status', [PrintOrderController::class, 'checkPaymentStatus']);
     Route::post('/print-orders/{id}/qris-string', [App\Http\Controllers\Api\PrintOrderController::class, 'getQrisString']);
     // ─────────────────────────────
+    // Payment QRIS
+Route::post('/payment/qris', [\App\Http\Controllers\Api\PaymentController::class, 'generateQris']);
 
 });
 
