@@ -46,57 +46,101 @@ class OrderController extends Controller
     }
 
     /**
-     * Buat pesanan baru dari keranjang.
-     * Body: { payment_method, address }
+     * Buat pesanan baru dari keranjang atau langsung (direct order).
+     * Body: { payment_method, address, product_id, product_variant_id, quantity }
      */
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'payment_method' => 'required|string|in:cod,transfer',
-            'address'        => 'required|string|max:500',
+            'payment_method'     => 'required|string|in:cod,transfer',
+            'address'            => 'required|string|max:500',
+            'product_id'         => 'nullable|integer|exists:products,id',
+            'product_variant_id' => 'nullable|integer|exists:product_variants,id',
+            'quantity'           => 'nullable|integer|min:1',
         ]);
 
         $user = $request->user();
 
-        // Ambil keranjang dengan eager loading produk dan varian
-        $cart = Cart::where('user_id', $user->id)->with(['items.product', 'items.variant'])->first();
+        // ── Direct Order Flow ──
+        if ($request->has('product_id')) {
+            $productId = $validated['product_id'];
+            $variantId = $validated['product_variant_id'] ?? null;
+            $qty = $validated['quantity'] ?? 1;
 
-        if (!$cart || $cart->items->isEmpty()) {
-            return response()->json(['message' => 'Keranjang kosong.'], 422);
-        }
+            $product = \App\Models\Product::findOrFail($productId);
+            $variant = null;
+            if ($variantId) {
+                $variant = \App\Models\ProductVariant::findOrFail($variantId);
+            }
 
-        // Hitung total
-        $totalPrice   = $cart->items->sum('subtotal');
-        $shippingCost = 0; // gratis ongkir untuk saat ini
-        $grandTotal   = $totalPrice + $shippingCost;
+            $itemPrice = $variant ? ($variant->harga ?? $product->price) : $product->price;
+            $totalPrice = $itemPrice * $qty;
+            $shippingCost = 0; // gratis ongkir
+            $grandTotal = $totalPrice + $shippingCost;
 
-        // Buat order
-        $order = Order::create([
-            'user_id'        => $user->id,
-            'order_code'     => 'ORD-' . strtoupper(Str::random(8)),
-            'total_price'    => $totalPrice,
-            'shipping_cost'  => $shippingCost,
-            'grand_total'    => $grandTotal,
-            'payment_method' => $validated['payment_method'],
-            'payment_status' => 'pending',
-            'order_status'   => 'process',
-            'address'        => $validated['address'],
-        ]);
+            // Buat order
+            $order = Order::create([
+                'user_id'        => $user->id,
+                'order_code'     => 'ORD-' . strtoupper(Str::random(8)),
+                'total_price'    => $totalPrice,
+                'shipping_cost'  => $shippingCost,
+                'grand_total'    => $grandTotal,
+                'payment_method' => $validated['payment_method'],
+                'payment_status' => 'pending',
+                'order_status'   => 'process',
+                'address'        => $validated['address'],
+            ]);
 
-        // Salin items dari keranjang ke order_items
-        foreach ($cart->items as $cartItem) {
             OrderItem::create([
                 'order_id'           => $order->id,
-                'product_id'         => $cartItem->product_id,
-                'product_variant_id' => $cartItem->product_variant_id,
-                'quantity'           => $cartItem->quantity,
-                'price'              => $cartItem->product_variant_id ? ($cartItem->variant?->harga ?? $cartItem->product->price) : $cartItem->product->price,
-                'subtotal'           => $cartItem->subtotal,
+                'product_id'         => $productId,
+                'product_variant_id' => $variantId,
+                'quantity'           => $qty,
+                'price'              => $itemPrice,
+                'subtotal'           => $totalPrice,
             ]);
-        }
+        } else {
+            // ── Standard Cart Flow ──
+            // Ambil keranjang dengan eager loading produk dan varian
+            $cart = Cart::where('user_id', $user->id)->with(['items.product', 'items.variant'])->first();
 
-        // Kosongkan keranjang
-        $cart->items()->delete();
+            if (!$cart || $cart->items->isEmpty()) {
+                return response()->json(['message' => 'Keranjang kosong.'], 422);
+            }
+
+            // Hitung total
+            $totalPrice   = $cart->items->sum('subtotal');
+            $shippingCost = 0; // gratis ongkir untuk saat ini
+            $grandTotal   = $totalPrice + $shippingCost;
+
+            // Buat order
+            $order = Order::create([
+                'user_id'        => $user->id,
+                'order_code'     => 'ORD-' . strtoupper(Str::random(8)),
+                'total_price'    => $totalPrice,
+                'shipping_cost'  => $shippingCost,
+                'grand_total'    => $grandTotal,
+                'payment_method' => $validated['payment_method'],
+                'payment_status' => 'pending',
+                'order_status'   => 'process',
+                'address'        => $validated['address'],
+            ]);
+
+            // Salin items dari keranjang ke order_items
+            foreach ($cart->items as $cartItem) {
+                OrderItem::create([
+                    'order_id'           => $order->id,
+                    'product_id'         => $cartItem->product_id,
+                    'product_variant_id' => $cartItem->product_variant_id,
+                    'quantity'           => $cartItem->quantity,
+                    'price'              => $cartItem->product_variant_id ? ($cartItem->variant?->harga ?? $cartItem->product->price) : $cartItem->product->price,
+                    'subtotal'           => $cartItem->subtotal,
+                ]);
+            }
+
+            // Kosongkan keranjang
+            $cart->items()->delete();
+        }
 
         // Buat notifikasi untuk user
         Notification::create([
