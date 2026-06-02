@@ -85,6 +85,54 @@ class AdminCourierController extends Controller
             ->with('success', "Kurir berhasil {$status}!");
     }
 
+    public function updateLocation(Request $request, $id)
+{
+    $request->validate([
+        'latitude' => 'required|numeric',
+        'longitude' => 'required|numeric',
+    ]);
+
+    $courier = Courier::find($id);
+
+    if (!$courier) {
+        return response()->json([
+            'message' => 'Kurir tidak ditemukan',
+        ], 404);
+    }
+
+    $courier->update([
+    'current_lat' => $request->latitude,
+    'current_lng' => $request->longitude,
+]);
+
+    return response()->json([
+        'message' => 'Lokasi kurir berhasil diperbarui',
+        'data' => $courier,
+    ], 200);
+}
+
+    public function getLocation($id)
+    {
+        $courier = Courier::select(
+            'id',
+            'user_id',
+            'latitude',
+            'longitude',
+            'is_available',
+            'updated_at'
+        )->find($id);
+
+        if (!$courier) {
+            return response()->json([
+                'message' => 'Kurir tidak ditemukan',
+            ], 404);
+        }
+
+        return response()->json([
+            'data' => $courier,
+        ], 200);
+    }
+
     /**
      * Hapus kurir (beserta user & profile).
      */
